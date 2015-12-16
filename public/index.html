@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<title>Learning Node Take 2</title>
+		<meta charset="utf-8">
+		
+		<link rel="stylesheet" href="style/style.css">
+		<link href="style/bootstrap.css" rel="stylesheet">
+	</head>
+	
+	<body>
+		<div id="start">
+      		<button id="startButton" type="button" class="btn btn-default">Start</button>
+    	</div>
+    	<div id="inQueue"> IN QUEUE <div>
+		<canvas id="gameCanvas"></canvas>
+		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+		<script src="http://localhost:8000/socket.io/socket.io.js"></script>
+		<script src="js/requestAnimationFrame.js"></script>
+		<script src="js/Player.js"></script>
+		<script src="js/game.js"></script>
+		<script src="js/Keys.js"></script>
+		 <script>
+		// 	// Initialise the game
+		init();
+		// 	init();
+		// 	animate();
+		// </script>
+	</body>
+</html>
+
+<!-- Used Rob Hawkes "mozilla festival" as a basis for initialization - https://github.com/robhawkes/mozilla-festival -->

@@ -1,0 +1,26 @@
+body {
+	overflow: hidden;
+}
+
+canvas {
+	display: block;
+}
+
+
+#startButton{
+    position: relative;
+    top: 40%;
+    left: 40%;
+    width: 100px;
+    height: 100px;
+}
+
+#inQueue{
+	position: relative;
+    top: 40%;
+    left: 40%;
+    width: 100px;
+    height: 100px;
+    display: none;
+    font-size: 40px;
+}
