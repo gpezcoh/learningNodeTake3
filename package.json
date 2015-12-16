@@ -1,0 +1,10 @@
+{
+  "name": "GabesGreatGame",
+  "main": "game.js",
+  "scripts": {
+    "start": "node game.js"
+  },
+  "dependencies": {
+    "socket": "latest"
+  }
+}
