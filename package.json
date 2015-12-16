@@ -5,6 +5,6 @@
     "start": "node game.js"
   },
   "dependencies": {
-    "socket": "latest"
+    "socket.io": "latest"
   }
 }
