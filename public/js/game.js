@@ -1,6 +1,9 @@
 var canvas,
 	keys,
-	localPlayer;
+	ctx,
+	localPlayer,
+	socket,
+	otherPlayer;
 
 function init(){
 	canvas = document.getElementById("gameCanvas");
@@ -18,7 +21,6 @@ function init(){
 }
 
 $("#startButton").click(function(){
-	console.log("clicked")
 	socket.emit("find game");
 });
 
@@ -33,20 +35,77 @@ var setEventHandlers = function() {
 	socket.on("connect", onSocketConnected);
 	socket.on("disconnect", onSocketDisconnect);
 	socket.on("in queue", onInQueue);
-	socket.on("match found", onMatchFound);
-	// socket.on("new player", onNewPlayer);
-	// socket.on("move player", onMovePlayer);
+	socket.on("match found home", onMatchFoundHome);
+	socket.on("match found away", onMatchFoundAway);
+	socket.on("start match", onStartMatch);
+	socket.on("new player", onNewPlayer);
+	socket.on("move player", onMovePlayer);
 	// socket.on("remove player", onRemovePlayer);
 };
 
+function onStartMatch(data){
+	$("#inQueue").hide();
+	$("#startButton").hide();
+}
+
+function onMovePlayer(data) {
+	var movePlayer = otherPlayer;
+
+	// Player not found
+	if (!movePlayer) {
+		console.log("Player not found: "+data.id);
+		return;
+	};
+
+	// Update player position
+	movePlayer.setX(data.x);
+	movePlayer.setY(data.y);
+};
+
+function onNewPlayer(data) {
+	console.log("New player connected: "+data.id);
+
+	// Initialise the new player
+	var tempTeam = 1;
+	if(localPlayer.team === 1){
+		tempTeam = 2
+	}
+	otherPlayer = new Player(data.id, tempTeam, data.x, data.y);
+
+	// localPlayer.draw(ctx);
+
+	console.log(localPlayer)
+	console.log(data.x)
+
+	animate();
+};
+
+
 function onInQueue(data){
-	console.log(data.id);
 	$("#startButton").hide();
 	$("#inQueue").show();
 }
 
-function onMatchFound(data){
-	console.log(data.players);
+function onMatchFoundHome(data){
+	console.log("home")
+	var startX1 = Math.round(Math.random()*((canvas.width-5)/2)),
+		 startX2 = Math.round(Math.random()*((canvas.width-5)/2) + (canvas.width-5)/2),
+			startY = Math.round(Math.random()*(canvas.height-5));
+	localPlayer = new Player(data.players[0].id, 1, startX1,startY);
+	// otherPlayer = new Player(data.players[1].id, 2, startX2,startY);
+	socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY(), 
+		team: localPlayer.team, id: localPlayer.id});
+}
+
+function onMatchFoundAway(data){
+	console.log("away")
+	var startX1 = Math.round(Math.random()*((canvas.width-5)/2)),
+		 startX2 = Math.round(Math.random()*((canvas.width-5)/2) + (canvas.width-5)/2),
+			startY = Math.round(Math.random()*(canvas.height-5));
+	localPlayer = new Player(data.players[1].id, 2, startX2,startY);
+	// otherPlayer = new Player(data.players[0].id, 1, startX1,startY);
+	socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY(), 
+		team: localPlayer.team, id: localPlayer.id});
 }
 
 // Keyboard key down
@@ -68,7 +127,6 @@ function onResize(e) {
 	// Maximise the canvas
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-	localPlayer.draw(ctx);
 };
 
 function onSocketConnected(){
@@ -113,27 +171,14 @@ function draw() {
 	ctx.fillRect(canvas.width/2,0,2,canvas.height);
 
 	// Draw the local player
-
 	localPlayer.draw(ctx);
 
 	// Draw the remote players
-	var i;
-	for (i = 0; i < remotePlayers.length; i++) {
-		remotePlayers[i].draw(ctx);
-	};
-};
 
+	otherPlayer.draw(ctx);
 
-/**************************************************
-** GAME HELPER FUNCTIONS
-**************************************************/
-// Find player by ID
-function playerById(id) {
-	var i;
-	for (i = 0; i < remotePlayers.length; i++) {
-		if (remotePlayers[i].id == id)
-			return remotePlayers[i];
-	};
-	
-	return false;
+	// var i;
+	// for (i = 0; i < remotePlayers.length; i++) {
+	// 	remotePlayers[i].draw(ctx);
+	// };
 };

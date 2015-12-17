@@ -6,12 +6,14 @@ var util = require("util"),
 var socket,
 	players,
 	connected,
+	matchsize,
 	matches;
 
 function init() {
 	players = [];
 	connected = [];
 	matches = [];
+	matchsize = 2;
 	socket = io.listen(8000);
 	socket.configure(function() {
 		socket.set("transports", ["websocket"]);
@@ -29,9 +31,29 @@ function onSocketConnection(client) {
 	client.on("disconnect", onClientDisconnect);
 	client.on("find game", onFindGame);
 	connected.push(new Player(client.id));
-	util.log(connected)
-	// client.on("new player", onNewPlayer);
-	// client.on("move player", onMovePlayer);
+	client.on("new player", onNewPlayer);
+	client.on("move player", onMovePlayer);
+};
+
+function onNewPlayer(data){
+	var newPlayer = new Player(data.id);
+	newPlayer.setX(data.x);
+	newPlayer.setY(data.y);
+	newPlayer.setTeam(data.team);
+	util.log("newPlayer")
+	util.log(data)
+
+	this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(),
+	 y: newPlayer.getY()});
+
+	// var i, existingPlayer;
+	// for(i = 0; i < players.length; ++i){
+	// 	existingPlayer = players[i];
+	// 	this.emit("new player", {id: existingPlayer.id, x: existingPlayer.getX(), 
+	// 		y: existingPlayer.getY()});
+	// };
+	
+	players.push(newPlayer);
 };
 
 function onFindGame(){
@@ -42,15 +64,35 @@ function onFindGame(){
 	};
 	connected.splice(connected.indexOf(searchPlayer), 1);
 	if(findMatch(searchPlayer)){
-		this.emit("match found", {players: matches[0].players});
+		this.emit("match found away", {players: matches[0].players});
 		util.log(matches[0].id)
 		var tempId = matches[0].id;
-		socket.sockets.socket(tempId).emit("match found", {players: matches[0].players});
+		socket.sockets.socket(tempId).emit("match found home", {players: matches[0].players});
+		if(matches[0].players.length = matchsize){
+			this.emit("start match", {players: matches[0].players});
+			socket.sockets.socket(tempId).emit("start match", {players: matches[0].players});
+			matches.splice(0, 1);
+		}
 	}
 	else{
 		this.emit("in queue", {id: searchPlayer.id});
 	}
 }
+
+function onMovePlayer(data){
+	var movePlayer = playerByIdInGame(this.id);
+
+	if (!movePlayer) {
+	    util.log("Player not found: "+this.id);
+	    return;
+	};
+
+	movePlayer.setX(data.x);
+	movePlayer.setY(data.y);
+
+	this.broadcast.emit("move player", {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
+
+};
 
 function findMatch(player){
 	if(matches.length === 0){
@@ -79,6 +121,15 @@ function playerById(id) {
     for (var i = 0; i < connected.length; i++) {
         if (connected[i].id === id)
             return connected[i];
+    };
+
+    return false;
+};
+
+function playerByIdInGame(id) {
+    for (var i = 0; i < players.length; i++) {
+        if (players[i].id === id)
+            return players[i];
     };
 
     return false;

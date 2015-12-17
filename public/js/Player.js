@@ -1,10 +1,11 @@
 /**************************************************
 ** GAME PLAYER CLASS
 **************************************************/
-var Player = function(startX, startY) {
+var Player = function(id, team,startX,startY) {
 	var x = startX,
 		y = startY,
-		id,
+		id = id,
+		team = team,
 		moveAmount = 2;
 
 	var getX = function() {
@@ -52,6 +53,8 @@ var Player = function(startX, startY) {
 		getY: getY,
 		setX: setX,
 		setY: setY,
+		id: id,
+		team: team,
 		update: update,
 		draw: draw,
 	}

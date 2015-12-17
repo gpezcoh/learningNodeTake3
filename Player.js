@@ -12,6 +12,10 @@ var Player = function(id) {
         return y;
     };
 
+    var getTeam = function() {
+        return team;
+    };
+
     var setX = function(newX) {
         x = newX;
     };
@@ -20,11 +24,17 @@ var Player = function(id) {
         y = newY;
     };
 
+    var setTeam = function(newTeam) {
+        team = newTeam;
+    };
+
     return {
         getX: getX,
         getY: getY,
         setX: setX,
         setY: setY,
+        getTeam: getTeam,
+        setTeam: setTeam,
         id: id,
         team: team
     }
