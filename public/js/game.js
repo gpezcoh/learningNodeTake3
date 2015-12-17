@@ -94,7 +94,7 @@ function onMatchFoundHome(data){
 	localPlayer = new Player(data.players[0].id, 1, startX1,startY);
 	// otherPlayer = new Player(data.players[1].id, 2, startX2,startY);
 	socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY(), 
-		team: localPlayer.team, id: localPlayer.id});
+		team: localPlayer.team, id: localPlayer.id,oppId: data.players[1].id});
 }
 
 function onMatchFoundAway(data){
@@ -105,7 +105,7 @@ function onMatchFoundAway(data){
 	localPlayer = new Player(data.players[1].id, 2, startX2,startY);
 	// otherPlayer = new Player(data.players[0].id, 1, startX1,startY);
 	socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY(), 
-		team: localPlayer.team, id: localPlayer.id});
+		team: localPlayer.team, id: localPlayer.id,oppId: data.players[0].id});
 }
 
 // Keyboard key down
@@ -156,7 +156,7 @@ function update() {
 	// Update local player and check for change
 	if (localPlayer.update(keys)) {
 		// Send local player data to the game server
-		socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
+		socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY(),oppId: otherPlayer.id});
 	};
 };
 

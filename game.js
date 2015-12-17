@@ -43,7 +43,7 @@ function onNewPlayer(data){
 	util.log("newPlayer")
 	util.log(data)
 
-	this.broadcast.emit("new player", {id: newPlayer.id, x: newPlayer.getX(),
+	socket.sockets.socket(data.oppId).emit("new player", {id: newPlayer.id, x: newPlayer.getX(),
 	 y: newPlayer.getY()});
 
 	// var i, existingPlayer;
@@ -90,7 +90,7 @@ function onMovePlayer(data){
 	movePlayer.setX(data.x);
 	movePlayer.setY(data.y);
 
-	this.broadcast.emit("move player", {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
+	socket.sockets.socket(data.oppId).emit("move player", {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
 
 };
 
