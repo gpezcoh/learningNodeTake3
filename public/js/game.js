@@ -3,7 +3,8 @@ var canvas,
 	ctx,
 	localPlayer,
 	socket,
-	otherPlayer;
+	otherPlayer,
+	playing;
 
 function init(){
 	canvas = document.getElementById("gameCanvas");
@@ -40,12 +41,21 @@ var setEventHandlers = function() {
 	socket.on("start match", onStartMatch);
 	socket.on("new player", onNewPlayer);
 	socket.on("move player", onMovePlayer);
-	// socket.on("remove player", onRemovePlayer);
+	socket.on("remove match", onRemoveMatch);
 };
 
 function onStartMatch(data){
 	$("#inQueue").hide();
 	$("#startButton").hide();
+	playing = true;
+}
+
+function onRemoveMatch(){
+	console.log("hello")
+	playing = false;
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	// window.cancelAnimationFrame(animate);
+	$("#startButton").show();
 }
 
 function onMovePlayer(data) {
@@ -141,11 +151,14 @@ function onSocketDisconnect(){
 ** GAME ANIMATION LOOP
 **************************************************/
 function animate() {
-	update();
-	draw();
+	console.log("hello")
+	if(playing){
+		update();
+		draw();
 
-	// Request a new animation frame using Paul Irish's shim
-	window.requestAnimFrame(animate);
+		// Request a new animation frame using Paul Irish's shim
+		window.requestAnimFrame(animate);
+	}
 };
 
 

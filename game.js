@@ -7,12 +7,14 @@ var socket,
 	players,
 	connected,
 	matchsize,
-	matches;
+	matches,
+	activeMatches;
 
 function init() {
 	players = [];
 	connected = [];
 	matches = [];
+	activeMatches = [];
 	matchsize = 2;
 	socket = io.listen(8000);
 	socket.configure(function() {
@@ -40,8 +42,6 @@ function onNewPlayer(data){
 	newPlayer.setX(data.x);
 	newPlayer.setY(data.y);
 	newPlayer.setTeam(data.team);
-	util.log("newPlayer")
-	util.log(data)
 
 	socket.sockets.socket(data.oppId).emit("new player", {id: newPlayer.id, x: newPlayer.getX(),
 	 y: newPlayer.getY()});
@@ -62,16 +62,17 @@ function onFindGame(){
 	    util.log("Player not found: "+this.id);
 	    return;
 	};
-	connected.splice(connected.indexOf(searchPlayer), 1);
 	if(findMatch(searchPlayer)){
 		this.emit("match found away", {players: matches[0].players});
-		util.log(matches[0].id)
 		var tempId = matches[0].id;
+		matches[0].players.push(searchPlayer);
 		socket.sockets.socket(tempId).emit("match found home", {players: matches[0].players});
 		if(matches[0].players.length = matchsize){
 			this.emit("start match", {players: matches[0].players});
 			socket.sockets.socket(tempId).emit("start match", {players: matches[0].players});
-			matches.splice(0, 1);
+			activeMatches.push(matches[0]);
+			matches.splice(0, 1)
+			util.log(activeMatches)
 		}
 	}
 	else{
@@ -109,12 +110,56 @@ function onClientDisconnect() {
 	util.log("Player has disconnected: "+this.id);
 	var removePlayer = playerById(this.id);
 
+	util.log("connected")
+	util.log(connected)
+
 	if (!removePlayer) {
 	    util.log("Player not found: "+this.id);
 	    return;
 	};
-	players.splice(players.indexOf(removePlayer), 1);
-	this.broadcast.emit("remove player", {id: this.id});
+
+	connected.splice(connected.indexOf(removePlayer), 1);
+
+	util.log("connected")
+	util.log(connected)
+
+	var removeMatch = matchesById(this.id);
+	util.log(removeMatch)
+	if (!removeMatch) {
+	    removeMatch = activeMatchesById(this.id);
+	    if(!removeMatch){
+	    	 util.log("Match not found: "+this.id);
+	    	return;
+	    }
+	    else {
+	    	activeMatches.splice(activeMatches.indexOf(removeMatch), 1);
+	    }
+	}
+	else {
+		util.log("match found")
+		matches.splice(matches.indexOf(removeMatch), 1);
+	}
+	socket.sockets.socket(removeMatch.id).emit("remove match");
+};
+
+function activeMatchesById(id) {
+    for (var i = 0; i < activeMatches.length; i++) {
+        if (activeMatches[i].players[0].id === id)
+            return activeMatches[i].players[1];
+        else if (activeMatches[i].players[1].id === id)
+        	return activeMatches[i].players[0];
+    };
+
+    return false;
+};
+
+function matchesById(id) {
+    for (var i = 0; i < matches.length; i++) {
+        if (matches[i].id === id)
+            return matches[i];
+    };
+
+    return false;
 };
 
 function playerById(id) {
